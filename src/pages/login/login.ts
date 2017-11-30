@@ -3,6 +3,8 @@ import { IonicPage, NavController, NavParams,LoadingController,ToastController }
 import { AuthProvider } from '../../providers/auth/auth';
 import {FormBuilder,Validators } from '@angular/forms';
 import {TabsPage} from '../tabs/tabs';
+import {Storage} from '@ionic/storage';
+import {ChatProvider} from '../../providers/chat/chat';
 @IonicPage()
 @Component({
   selector: 'page-login',
@@ -14,14 +16,15 @@ export class LoginPage {
   public backgroundImage: any = "./assets/bg1.jpg";
   public imgLogo: any = "./assets/medium_150.70391061453px_1202562_easyicon.net.png";
 
-  constructor(public toastCtrl:ToastController,public loadingCtrl:LoadingController,public fb: FormBuilder,public authService:AuthProvider,public navCtrl: NavController, public navParams: NavParams) {
+  constructor(public chatService:ChatProvider,public storage:Storage,public toastCtrl:ToastController,public loadingCtrl:LoadingController,public fb: FormBuilder,public authService:AuthProvider,public navCtrl: NavController, public navParams: NavParams) {
     let EMAIL_REGEXP = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
     this.loginForm = fb.group({
           email: ['', Validators.compose([Validators.required, Validators.pattern(EMAIL_REGEXP)])],
           password: ['', Validators.compose([Validators.minLength(6), Validators.required])]
     });  
   }
-
+  
+ 
   login(){
     let loadingPopup = this.loadingCtrl.create({
       spinner: 'crescent', 
@@ -29,35 +32,47 @@ export class LoginPage {
     });
     loadingPopup.present();
     this.authService.login(this.loginForm.value).then((res:any)=>{
-      if(res){
-        this.presentToast("Login SuccessFull!",true); 
-        loadingPopup.dismiss();        
+      
+      if(res.success){
+
+        this.authService.checkUserType().then((res:any)=>{
+          this.presentToast("Login SuccessFull!",true,res.user_type,res.salesDetails,1000); 
+          loadingPopup.dismiss();
+        });
+                
       }
     }).catch((res:any)=>{
-      this.presentToast("Wrong Credentials!",false); 
+   
+        if(res.message.code=='auth/network-request-failed')
+           this.presentToast("No Internet Connection! Please Check Network Setting",false,'','',2000); 
+        else   
+           this.presentToast("Please Check your Credentials",false,'','',2000); 
+      
       loadingPopup.dismiss(); 
     });
   }
 
-  presentToast(message,flag) {
+  presentToast(message,flag,user_type,salesDetails,timeout) {
     
      const toast = this.toastCtrl.create({
        message: message,
-       duration: 1000,
+       duration: timeout,
        position: 'bottom'
      });
    
      toast.onDidDismiss(() => {
-       if(flag)
-        this.navCtrl.setRoot(TabsPage);
-      //  if(flag==true && flag!='wrong'){
-      //    if(this.user_type=='sales')
-      //     this.navCtrl.setRoot(HomePage,{"data":getData,"user_type":this.user_type});
-      //    else
-      //      this.navCtrl.setRoot("ChatDetailPage",{"data":getData,"user_type":this.user_type});
-         
-      //  }
-      
+       if(flag){
+        this.storage.set('user_type',user_type);
+         if(user_type=='sales'){       
+          this.navCtrl.setRoot(TabsPage,{"user_type":user_type});    
+         }
+         else if(user_type=='client'){    
+          this.chatService.initializeuser(salesDetails);
+          this.navCtrl.setRoot("ChatDetailsPage",{"user_type":user_type,"salesDetails":salesDetails});   
+         }else if(user_type=='admin'){
+           this.navCtrl.setRoot('AdminHomePage');
+         }
+       }    
      });
    
      toast.present();

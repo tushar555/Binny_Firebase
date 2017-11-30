@@ -1,0 +1,22 @@
+<ion-header>
+    <ion-navbar color="navbar" class="white-text">
+      <ion-title no-padding >
+        <ion-item style="background: transparent !important" no-lines no-padding>
+          <!-- <ion-avatar item-left>
+            <img [src]="photoURL">
+          </ion-avatar> -->
+          <span style="color:aliceblue">Select Sales Person</span>
+        </ion-item>
+      </ion-title>
+    </ion-navbar>
+  </ion-header>
+
+
+<ion-content no-padding>
+  <ion-searchbar (ionInput)="getItems($event)" mode='ios'></ion-searchbar>
+  <ion-list>
+    <ion-item *ngFor="let person of salesPersons" (click)="gotoClient(person)">
+     <b> {{ person.displayName }} </b>
+    </ion-item>
+  </ion-list>
+</ion-content>

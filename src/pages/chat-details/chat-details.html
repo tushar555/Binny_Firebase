@@ -1,0 +1,124 @@
+<ion-header>
+  <ion-navbar color="navbar" class="white-text">
+    <ion-title no-padding *ngIf="user_type=='sales'">
+      <ion-item style="background: transparent !important" no-lines no-padding>
+
+        <ion-avatar item-left>
+          <img [src]="photoUrl">
+        </ion-avatar>
+
+        <span style="color:aliceblue">{{name}}</span>
+
+      </ion-item>
+
+    </ion-title>
+
+    <ion-title no-padding *ngIf="user_type=='client'">
+      <ion-item style="background: transparent !important" no-lines no-padding>
+        
+        <ion-avatar item-left>
+          <img [src]="photoUrl">
+        </ion-avatar>
+       
+        <span style="color:aliceblue">{{name}}</span>
+      
+      </ion-item>
+    </ion-title>
+   
+    <ion-buttons right *ngIf="user_type=='client'">
+
+      <button ion-button icon-only (click)="clearChat()">
+        <ion-icon ios="ios-trash" md="md-trash"></ion-icon>
+      </button>
+    </ion-buttons>
+   
+    <ion-buttons right>
+      <button ion-button icon-only (click)="attachFile($event)">
+        <ion-icon ios="ios-attach" md="md-attach"></ion-icon>
+      </button>
+    </ion-buttons>
+   
+    <ion-buttons right *ngIf="user_type=='client'">
+
+      <button ion-button icon-only (click)="gotoProfile()">
+        <ion-icon ios="ios-contact" md="md-contact"></ion-icon>
+      </button>
+    </ion-buttons>
+  
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding #content>
+  <div class="chatwindow">
+    <ion-list no-lines>
+      <ion-item *ngFor="let item of allMessages;let i=index">
+        <div text-wrap class="bubble me" *ngIf="item.sentBy === uid">
+
+          <span *ngIf="imageOrNot[i]=== undefined">
+            {{item.message}}
+          </span>
+
+          <span *ngIf='imageOrNot[i]==="png" || imageOrNot[i] ==="jpg" || imageOrNot[i]=="jpeg"'>
+            <!-- <img [src]="item.message" tappable  imageViewer> -->
+
+            <img [src]="item.message" class="thumb-img" imageViewer>
+
+          </span>
+
+          <span *ngIf='imageOrNot[i]==="pdf" || imageOrNot[i] ==="xlsx" || imageOrNot[i]==="xls" || imageOrNot[i]==="xlsm"'>
+            <img src="assets/excel.png" height="20px;" width="20px;" *ngIf='imageOrNot[i]!=="pdf"'>
+            <img *ngIf='imageOrNot[i]==="pdf"' src="assets/pdf.png" height="20px;" width="20px;"> {{item.fileName}}&nbsp;&nbsp;
+            <ion-icon (click)="downloadFile(item.message,item.fileName)" ios="ios-download" md="md-download"></ion-icon>
+          </span>
+
+
+        </div>
+
+        <div text-wrap class="bubble you" *ngIf="item.sentBy !== uid">
+
+          <span *ngIf="imageOrNot[i]=== undefined">
+            {{item.message}}
+          </span>
+
+          <span *ngIf='imageOrNot[i]==="png" || imageOrNot[i] ==="jpg" || imageOrNot[i]=="jpeg"'>
+            <img [src]="item.message" tappable imageViewer>
+          </span>
+
+          <span *ngIf='imageOrNot[i]==="pdf" || imageOrNot[i] ==="xlsx" || imageOrNot[i]==="xls" || imageOrNot[i]==="xlsm"'>
+            <img src="assets/excel.png" height="20px;" width="20px;" *ngIf='imageOrNot[i]!=="pdf"'>
+            <img *ngIf='imageOrNot[i]==="pdf"' src="assets/pdf.png" height="20px;" width="20px;"> {{item.fileName}} &nbsp;&nbsp;
+            <ion-icon (click)="downloadFile(item.message,item.fileName)" ios="ios-download"
+              md="md-download"></ion-icon>
+          </span>
+
+        </div>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>
+<ion-footer>
+  <ion-toolbar style="height: 50px;" color="nocolor">
+    <table border="0" width="100%" style="background: transparent;">
+      <tr>
+        <td width="80%">
+
+          <input [(ngModel)]="message" type="text" style="width: 100%; height: 40px; border-radius: 4px;display: inline-block;border: 1px solid #ccc;box-sizing: border-box;padding-left: 10px"
+            name="comment" placeholder="Type a message">
+
+        </td>
+        <td width="20%" align="center" valign="middle">
+          <table border="0" (click)="sendMessage(message)" width="45px" height="45px" style="background: #8A8A8A; border-radius: 50%;box-shadow: 0px 0px 5px 0px #ccc;">
+            <tr>
+              <td align="center" valign="middle">
+                <ion-icon name="md-send" style="font-size: 25px;color: #fff"></ion-icon>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </ion-toolbar>
+</ion-footer>
+
